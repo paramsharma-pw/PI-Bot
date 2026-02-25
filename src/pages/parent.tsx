@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { ArrowRight, Play, Pause, ChevronDown, ChevronUp } from "lucide-react";
 import { Images } from "../assets/Images";
 import imgFamiliar from "../assets/ic_current_reality.png";
@@ -14,6 +14,7 @@ import vid1 from "../assets/vid_ai_learning_1.mp4";
 import vid2 from "../assets/vid_ai_learning_2.mp4";
 import vid3 from "../assets/vid_ai_learning_3.mp4";
 import { useAnalytics } from "../hooks/useAnalytics";
+import Confetti from "react-confetti";
 
 const problemItems = [
   {
@@ -139,12 +140,15 @@ const RobotLandingPage: React.FC = () => {
   ];
   const sliderTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [videoPlaying, setVideoPlaying] = useState<boolean[]>([
-    true,
-    true,
-    true,
+    false,
+    false,
+    false,
   ]);
   const [sliderValue, setSliderValue] = useState(5000);
   const [faqOpenIndex, setFaqOpenIndex] = useState<number | null>(0);
+  const [expandedFaqFullText, setExpandedFaqFullText] = useState<number | null>(
+    null,
+  );
   const [robotName, setRobotName] = useState<string>("");
   const [showSuccess, setShowSuccess] = useState<boolean>(false);
   const [showCongrats, setShowCongrats] = useState<boolean>(false);
@@ -157,6 +161,10 @@ const RobotLandingPage: React.FC = () => {
     readyToTest: false,
   });
   const { trackEvent } = useAnalytics();
+  const [windowDimensions, setWindowDimensions] = useState({
+    width: 0,
+    height: 0,
+  });
 
   const handleRobotNameSubmit = () => {
     if (robotName.trim()) {
@@ -169,6 +177,20 @@ const RobotLandingPage: React.FC = () => {
       setTimeout(() => setShowSuccess(false), 5000);
     }
   };
+  useEffect(() => {
+    const updateDimensions = () => {
+      setWindowDimensions({
+        width: 480,
+        height: 450,
+      });
+    };
+    if (showCongrats) {
+      updateDimensions();
+    }
+
+    window.addEventListener("resize", updateDimensions);
+    return () => window.removeEventListener("resize", updateDimensions);
+  }, [showCongrats]);
 
   const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = Number(e.target.value);
@@ -257,7 +279,8 @@ const RobotLandingPage: React.FC = () => {
                 Your child deserves AI — without addictive screens
               </h1>
               <p className="text-gray-200 mb-8 text-lg">
-                A 24x7 safe AI learning companion robot designed for focused, distraction-free growth.
+                A 24x7 safe AI learning companion robot designed for focused,
+                distraction-free growth.
               </p>
               <button
                 onClick={() => {
@@ -276,7 +299,7 @@ const RobotLandingPage: React.FC = () => {
                 </span>
               </button>
             </div>
-            <div className="mx-auto md:max-w-[80vw] flex flex-col md:flex-row items-center gap-12 md:gap-16 pt-60 sm:pt-10">
+            <div className="mx-auto md:max-w-[80vw] flex flex-col md:flex-row items-center gap-12 md:gap-16 pt-60 sm:pt-30">
               <div className="md:w-1/2 flex flex-col justify-center">
                 <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-3">
                   See How It Works
@@ -288,7 +311,7 @@ const RobotLandingPage: React.FC = () => {
               </div>
               <div className="md:w-1/2 flex justify-center">
                 <div
-                  className="relative w-full rounded-4xl bg-white overflow-hidden cursor-pointer group shadow-sm"
+                  className="relative w-full rounded-[72px] bg-white overflow-hidden cursor-pointer group shadow-sm"
                   onClick={toggleHeroAudio}
                 >
                   <img
@@ -322,10 +345,10 @@ const RobotLandingPage: React.FC = () => {
                   ref={audioHeroRef}
                   src={audioHeroSection}
                   onPlay={() => {
-                    setHeroAudioPlaying(true)
+                    setHeroAudioPlaying(true);
                     trackEvent("hero_audio_played", {
                       page: "parent_landing",
-                    })
+                    });
                   }}
                   onPause={() => setHeroAudioPlaying(false)}
                   onEnded={() => setHeroAudioPlaying(false)}
@@ -359,7 +382,7 @@ const RobotLandingPage: React.FC = () => {
             <img
               src={imgFamiliar}
               alt="Child studying at a desk"
-              className="rounded-3xl relative z-10 object-cover w-full shadow-xl"
+              className="rounded-[40px] relative z-10 object-cover w-full shadow-xl"
             />
           </div>
 
@@ -443,7 +466,7 @@ const RobotLandingPage: React.FC = () => {
               }`}
             >
               {/* Text card */}
-              <div className="md:w-2/5 bg-[#F8F8FB] rounded-3xl p-6 md:p-10 flex flex-col justify-center shadow-sm">
+              <div className="md:w-2/5 bg-[#F8F8FB] rounded-[40px] p-6 md:p-10 flex flex-col justify-center shadow-sm">
                 <h3 className="text-xl font-bold text-gray-800 mb-3">
                   {row.title}
                 </h3>
@@ -454,7 +477,7 @@ const RobotLandingPage: React.FC = () => {
 
               {/* Video */}
               <div
-                className="md:w-3/5 rounded-3xl overflow-hidden shadow-lg relative cursor-pointer group min-h-50 md:min-h-75"
+                className="md:w-3/5 rounded-[40px] overflow-hidden shadow-lg relative cursor-pointer group min-h-50 md:min-h-75"
                 onClick={() => {
                   trackEvent("video_played", {
                     videoTitle: row.title,
@@ -636,8 +659,8 @@ const RobotLandingPage: React.FC = () => {
           <div className="md:w-2/3 w-full flex flex-col gap-4">
             {faqItems.map((item, idx) => {
               const isOpen = faqOpenIndex === idx;
-              const isFirstCard = idx === 0;
-              const isDarkCard = isFirstCard || isOpen;
+              // const isFirstCard = idx === 0;
+              const isDarkCard = isOpen;
               return (
                 <div
                   key={idx}
@@ -653,6 +676,9 @@ const RobotLandingPage: React.FC = () => {
                       page: "parent_landing",
                     });
                     setFaqOpenIndex(isOpen ? null : idx);
+                    if (isOpen) {
+                      setExpandedFaqFullText(null);
+                    }
                   }}
                 >
                   <div className="flex items-center justify-between px-6 py-4">
@@ -676,8 +702,45 @@ const RobotLandingPage: React.FC = () => {
                   {isOpen && (
                     <div className="px-6 pb-6">
                       <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-line">
-                        {item.description}
+                        {expandedFaqFullText === idx
+                          ? item.description
+                          : item.description.length > 200
+                            ? item.description.substring(0, 200) + "..."
+                            : item.description}
                       </p>
+                      {item.description.length > 200 &&
+                        expandedFaqFullText !== idx && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              trackEvent("faq_see_more_clicked", {
+                                faqTitle: item.title,
+                                page: "parent_landing",
+                              });
+                              setExpandedFaqFullText(idx);
+                            }}
+                            className="text-indigo-400 hover:text-indigo-300 text-sm font-medium mt-3 flex items-center gap-1 transition-colors"
+                          >
+                            See more
+                            <ArrowRight className="w-3 h-3" />
+                          </button>
+                        )}
+                      {expandedFaqFullText === idx && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            trackEvent("faq_see_less_clicked", {
+                              faqTitle: item.title,
+                              page: "parent_landing",
+                            });
+                            setExpandedFaqFullText(null);
+                          }}
+                          className="text-indigo-400 hover:text-indigo-300 text-sm font-medium mt-3 flex items-center gap-1 transition-colors"
+                        >
+                          See less
+                          <ChevronUp className="w-3 h-3" />
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>
@@ -820,6 +883,15 @@ const RobotLandingPage: React.FC = () => {
       {/* Congratulations Popup */}
       {showCongrats && (
         <div className="absolute bottom-1/4 right-1/2 translate-x-1/2 z-50 p-4">
+          <div className="fixed inset-0 pointer-events-none z-50">
+            <Confetti
+              width={windowDimensions.width}
+              height={windowDimensions.height}
+              recycle={false} // Set to true if you want it to fall continuously
+              numberOfPieces={400}
+              gravity={0.15}
+            />
+          </div>
           <div className="bg-white rounded-2xl p-8 md:p-12 max-w-md w-full relative text-center shadow-xl animate-fade-in">
             <button
               onClick={() => setShowCongrats(false)}
@@ -848,7 +920,8 @@ const RobotLandingPage: React.FC = () => {
               </div>
             </div>
             <p className="text-gray-600 text-base md:text-lg mb-8">
-              You have successfully reserved your slot for this AI model of robot. You are now part of our exclusive early access phase.
+              You have successfully reserved your slot for this AI model of
+              robot. You are now part of our exclusive early access phase.
             </p>
             <button
               onClick={() => setShowCongrats(false)}
@@ -862,7 +935,9 @@ const RobotLandingPage: React.FC = () => {
 
       {/* Waitlist Form Popup */}
       {showWaitlist && (
-        <div className={`absolute ${earlyAccess?"top-4" : "bottom-1/4"} right-1/2 translate-x-1/2 z-50 p-4`}>
+        <div
+          className={`absolute ${earlyAccess ? "top-4" : "bottom-1/4"} right-1/2 translate-x-1/2 z-50 p-4`}
+        >
           <div className="bg-white rounded-2xl p-8 md:p-10 max-w-lg w-full relative shadow-xl animate-fade-in">
             <button
               onClick={() => setShowWaitlist(false)}
@@ -884,7 +959,10 @@ const RobotLandingPage: React.FC = () => {
                   className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-indigo-500"
                   value={waitlistData.firstName}
                   onChange={(e) =>
-                    setWaitlistData({ ...waitlistData, firstName: e.target.value })
+                    setWaitlistData({
+                      ...waitlistData,
+                      firstName: e.target.value,
+                    })
                   }
                 />
                 <input
@@ -893,7 +971,10 @@ const RobotLandingPage: React.FC = () => {
                   className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-indigo-500"
                   value={waitlistData.lastName}
                   onChange={(e) =>
-                    setWaitlistData({ ...waitlistData, lastName: e.target.value })
+                    setWaitlistData({
+                      ...waitlistData,
+                      lastName: e.target.value,
+                    })
                   }
                 />
               </div>
@@ -931,7 +1012,11 @@ const RobotLandingPage: React.FC = () => {
             </div>
             <button
               onClick={() => {
-                if (waitlistData.firstName && waitlistData.lastName && waitlistData.whatsappNumber) {
+                if (
+                  waitlistData.firstName &&
+                  waitlistData.lastName &&
+                  waitlistData.whatsappNumber
+                ) {
                   trackEvent("parent_waitlist_joined", {
                     firstName: waitlistData.firstName,
                     lastName: waitlistData.lastName,

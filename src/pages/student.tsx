@@ -10,6 +10,7 @@ import {
 import { Images } from "../assets/Images";
 import { useAnalytics } from "../hooks/useAnalytics";
 import ic_naming_robo from "../assets/ic_naming_robo.png";
+import Confetti from "react-confetti";
 
 const ChildLandingPage: React.FC = () => {
   const [expandedFeature, setExpandedFeature] = useState<number | null>(null);
@@ -23,6 +24,7 @@ const ChildLandingPage: React.FC = () => {
     whatsappNumber: "",
     readyToTest: false,
   });
+  const [selectedUseCases, setSelectedUseCases] = useState<number[]>([]);
   const { trackEvent } = useAnalytics();
   const bottomRef = useRef<HTMLDivElement>(null);
   const [timerActive, setTimerActive] = useState<boolean>(false);
@@ -45,6 +47,25 @@ const ChildLandingPage: React.FC = () => {
       }
     };
   }, []);
+  const [windowDimensions, setWindowDimensions] = useState({
+    width: 0,
+    height: 0,
+  });
+
+  useEffect(() => {
+    const updateDimensions = () => {
+      setWindowDimensions({
+        width: 480,
+        height: 450,
+      });
+    };
+    if (showCongrats) {
+      updateDimensions();
+    }
+
+    window.addEventListener("resize", updateDimensions);
+    return () => window.removeEventListener("resize", updateDimensions);
+  }, [showCongrats]);
 
   useEffect(() => {
     if (!timerActive) return;
@@ -329,7 +350,7 @@ const ChildLandingPage: React.FC = () => {
               <div className="w-full md:w-5/12">
                 <div
                   onClick={() => toggleFeature(index)}
-                  className="bg-[#fafafa] rounded-3xl p-8 md:p-16 flex flex-col border border-gray-100 relative cursor-pointer hover:shadow-lg transition-all duration-300 h-98"
+                  className="bg-[#fafafa] rounded-3xl p-8 md:p-16 flex flex-col border border-gray-100 relative cursor-pointer hover:shadow-lg transition-all duration-300 h-full"
                 >
                   <h3 className="text-xl font-bold mb-4">{feature.title}</h3>
 
@@ -361,11 +382,13 @@ const ChildLandingPage: React.FC = () => {
                   </p>
 
                   {/* Corner Image */}
-                  <img
-                    src={feature.image}
-                    alt="Feature icon"
-                    className="w-28 h-28 md:w-40 md:h-40 absolute bottom-0 right-0 opacity-40"
-                  />
+                  {expandedFeature === index && (
+                    <img
+                      src={feature.image}
+                      alt="Feature icon"
+                      className="w-28 h-28 md:w-40 md:h-40 absolute bottom-0 right-0 opacity-40"
+                    />
+                  )}
                 </div>
               </div>
 
@@ -404,16 +427,44 @@ const ChildLandingPage: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-10">
           {/* Card 1 */}
           <div
-            onClick={() =>
+            onClick={() => {
+              const newSelected = selectedUseCases.includes(0)
+                ? selectedUseCases.filter((i) => i !== 0)
+                : [...selectedUseCases, 0];
+              setSelectedUseCases(newSelected);
               trackEvent("use_case_clicked", {
                 useCase: "homework_help",
+                isSelected: !selectedUseCases.includes(0),
                 page: "child_landing",
-              })
-            }
-            className="bg-[#fafafa] rounded-3xl p-16 text-center border border-gray-50 hover:shadow-md transition-shadow cursor-pointer"
+              });
+            }}
+            className={`rounded-3xl p-16 text-center border cursor-pointer transition-all duration-300 ${
+              selectedUseCases.includes(0)
+                ? "bg-indigo-50 border-indigo-300 shadow-lg scale-105"
+                : "bg-[#fafafa] border-gray-50 hover:shadow-md"
+            }`}
           >
-            <div className="bg-indigo-100 w-10 h-10 rounded-lg flex items-center justify-center mx-auto mb-4 text-indigo-500">
-              <BookOpen className="w-5 h-5" />
+            <div className="flex items-start justify-between mb-4">
+              <div className="bg-indigo-100 w-10 h-10 rounded-lg flex items-center justify-center text-indigo-500">
+                <BookOpen className="w-5 h-5" />
+              </div>
+              {selectedUseCases.includes(0) && (
+                <div className="bg-indigo-500 rounded-full p-1">
+                  <svg
+                    className="w-4 h-4 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={3}
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                </div>
+              )}
             </div>
             <h3 className="font-bold mb-2">Help me with homework</h3>
             <p className="text-xs text-gray-500">
@@ -422,16 +473,44 @@ const ChildLandingPage: React.FC = () => {
           </div>
           {/* Card 2 */}
           <div
-            onClick={() =>
+            onClick={() => {
+              const newSelected = selectedUseCases.includes(1)
+                ? selectedUseCases.filter((i) => i !== 1)
+                : [...selectedUseCases, 1];
+              setSelectedUseCases(newSelected);
               trackEvent("use_case_clicked", {
                 useCase: "solve_doubts",
+                isSelected: !selectedUseCases.includes(1),
                 page: "child_landing",
-              })
-            }
-            className="bg-[#fafafa] rounded-3xl p-16 text-center border border-gray-50 hover:shadow-md transition-shadow cursor-pointer"
+              });
+            }}
+            className={`rounded-3xl p-16 text-center border cursor-pointer transition-all duration-300 ${
+              selectedUseCases.includes(1)
+                ? "bg-orange-50 border-orange-300 shadow-lg scale-105"
+                : "bg-[#fafafa] border-gray-50 hover:shadow-md"
+            }`}
           >
-            <div className="bg-orange-100 w-10 h-10 rounded-lg flex items-center justify-center mx-auto mb-4 text-orange-500">
-              <Lightbulb className="w-5 h-5" />
+            <div className="flex items-start justify-between mb-4">
+              <div className="bg-orange-100 w-10 h-10 rounded-lg flex items-center justify-center text-orange-500">
+                <Lightbulb className="w-5 h-5" />
+              </div>
+              {selectedUseCases.includes(1) && (
+                <div className="bg-orange-500 rounded-full p-1">
+                  <svg
+                    className="w-4 h-4 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={3}
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                </div>
+              )}
             </div>
             <h3 className="font-bold mb-2">Solve my Doubts</h3>
             <p className="text-xs text-gray-500">
@@ -440,16 +519,44 @@ const ChildLandingPage: React.FC = () => {
           </div>
           {/* Card 3 */}
           <div
-            onClick={() =>
+            onClick={() => {
+              const newSelected = selectedUseCases.includes(2)
+                ? selectedUseCases.filter((i) => i !== 2)
+                : [...selectedUseCases, 2];
+              setSelectedUseCases(newSelected);
               trackEvent("use_case_clicked", {
                 useCase: "play_games",
+                isSelected: !selectedUseCases.includes(2),
                 page: "child_landing",
-              })
-            }
-            className="bg-[#fafafa] rounded-3xl p-16 text-center border border-gray-50 hover:shadow-md transition-shadow cursor-pointer"
+              });
+            }}
+            className={`rounded-3xl p-16 text-center border cursor-pointer transition-all duration-300 ${
+              selectedUseCases.includes(2)
+                ? "bg-pink-50 border-pink-300 shadow-lg scale-105"
+                : "bg-[#fafafa] border-gray-50 hover:shadow-md"
+            }`}
           >
-            <div className="bg-pink-100 w-10 h-10 rounded-lg flex items-center justify-center mx-auto mb-4 text-pink-500">
-              <Gamepad2 className="w-5 h-5" />
+            <div className="flex items-start justify-between mb-4">
+              <div className="bg-pink-100 w-10 h-10 rounded-lg flex items-center justify-center text-pink-500">
+                <Gamepad2 className="w-5 h-5" />
+              </div>
+              {selectedUseCases.includes(2) && (
+                <div className="bg-pink-500 rounded-full p-1">
+                  <svg
+                    className="w-4 h-4 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={3}
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                </div>
+              )}
             </div>
             <h3 className="font-bold mb-2">Play something fun</h3>
             <p className="text-xs text-gray-500">
@@ -461,16 +568,44 @@ const ChildLandingPage: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10 max-w-3xl mx-auto">
           {/* Card 4 */}
           <div
-            onClick={() =>
+            onClick={() => {
+              const newSelected = selectedUseCases.includes(3)
+                ? selectedUseCases.filter((i) => i !== 3)
+                : [...selectedUseCases, 3];
+              setSelectedUseCases(newSelected);
               trackEvent("use_case_clicked", {
                 useCase: "talk_conversation",
+                isSelected: !selectedUseCases.includes(3),
                 page: "child_landing",
-              })
-            }
-            className="bg-[#fafafa] rounded-3xl p-16 text-center border border-gray-50 hover:shadow-md transition-shadow cursor-pointer"
+              });
+            }}
+            className={`rounded-3xl p-16 text-center border cursor-pointer transition-all duration-300 ${
+              selectedUseCases.includes(3)
+                ? "bg-blue-50 border-blue-300 shadow-lg scale-105"
+                : "bg-[#fafafa] border-gray-50 hover:shadow-md"
+            }`}
           >
-            <div className="bg-blue-100 w-10 h-10 rounded-lg flex items-center justify-center mx-auto mb-4 text-blue-500">
-              <MessageSquare className="w-5 h-5" />
+            <div className="flex items-start justify-between mb-4">
+              <div className="bg-blue-100 w-10 h-10 rounded-lg flex items-center justify-center text-blue-500">
+                <MessageSquare className="w-5 h-5" />
+              </div>
+              {selectedUseCases.includes(3) && (
+                <div className="bg-blue-500 rounded-full p-1">
+                  <svg
+                    className="w-4 h-4 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={3}
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                </div>
+              )}
             </div>
             <h3 className="font-bold mb-2">Just talk to me</h3>
             <p className="text-xs text-gray-500">
@@ -479,16 +614,44 @@ const ChildLandingPage: React.FC = () => {
           </div>
           {/* Card 5 */}
           <div
-            onClick={() =>
+            onClick={() => {
+              const newSelected = selectedUseCases.includes(4)
+                ? selectedUseCases.filter((i) => i !== 4)
+                : [...selectedUseCases, 4];
+              setSelectedUseCases(newSelected);
               trackEvent("use_case_clicked", {
                 useCase: "competition_ready",
+                isSelected: !selectedUseCases.includes(4),
                 page: "child_landing",
-              })
-            }
-            className="bg-[#fafafa] rounded-3xl p-16 text-center border border-gray-50 hover:shadow-md transition-shadow cursor-pointer"
+              });
+            }}
+            className={`rounded-3xl p-16 text-center border cursor-pointer transition-all duration-300 ${
+              selectedUseCases.includes(4)
+                ? "bg-emerald-50 border-emerald-300 shadow-lg scale-105"
+                : "bg-[#fafafa] border-gray-50 hover:shadow-md"
+            }`}
           >
-            <div className="bg-emerald-100 w-10 h-10 rounded-lg flex items-center justify-center mx-auto mb-4 text-emerald-500">
-              <Trophy className="w-5 h-5" />
+            <div className="flex items-start justify-between mb-4">
+              <div className="bg-emerald-100 w-10 h-10 rounded-lg flex items-center justify-center text-emerald-500">
+                <Trophy className="w-5 h-5" />
+              </div>
+              {selectedUseCases.includes(4) && (
+                <div className="bg-emerald-500 rounded-full p-1">
+                  <svg
+                    className="w-4 h-4 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={3}
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                </div>
+              )}
             </div>
             <h3 className="font-bold mb-2">Get Competition Ready</h3>
             <p className="text-xs text-gray-500">
@@ -608,6 +771,15 @@ const ChildLandingPage: React.FC = () => {
       {/* Congratulations Popup */}
       {showCongrats && (
         <div className="absolute top-80 right-1/2 translate-x-1/2 z-50 p-4">
+          <div className="fixed inset-0 pointer-events-none z-50">
+            <Confetti
+              width={windowDimensions.width}
+              height={windowDimensions.height}
+              recycle={false} // Set to true if you want it to fall continuously
+              numberOfPieces={400}
+              gravity={0.15}
+            />
+          </div>
           <div className="bg-white rounded-2xl p-8 md:p-12 max-w-md w-full relative text-center shadow-xl animate-fade-in">
             <button
               onClick={() => setShowCongrats(false)}
@@ -636,7 +808,8 @@ const ChildLandingPage: React.FC = () => {
               </div>
             </div>
             <p className="text-gray-600 text-base md:text-lg mb-8">
-              I'm getting ready to launch soon. Hang tight — I'll let you know as soon as I'm ready!
+              I'm getting ready to launch soon. Hang tight — I'll let you know
+              as soon as I'm ready!
             </p>
             <button
               onClick={() => setShowCongrats(false)}
@@ -653,9 +826,7 @@ const ChildLandingPage: React.FC = () => {
         <div className="absolute top-80 right-1/2 translate-x-1/2 z-50 p-4">
           <div className="bg-white rounded-2xl p-8 md:p-10 max-w-lg w-full relative shadow-xl animate-fade-in">
             <button
-              onClick={
-                () => setShowWaitlist(false)
-              }
+              onClick={() => setShowWaitlist(false)}
               className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl"
             >
               ×
@@ -674,7 +845,10 @@ const ChildLandingPage: React.FC = () => {
                   className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-indigo-500"
                   value={waitlistData.firstName}
                   onChange={(e) =>
-                    setWaitlistData({ ...waitlistData, firstName: e.target.value })
+                    setWaitlistData({
+                      ...waitlistData,
+                      firstName: e.target.value,
+                    })
                   }
                 />
                 <input
@@ -683,7 +857,10 @@ const ChildLandingPage: React.FC = () => {
                   className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-indigo-500"
                   value={waitlistData.lastName}
                   onChange={(e) =>
-                    setWaitlistData({ ...waitlistData, lastName: e.target.value })
+                    setWaitlistData({
+                      ...waitlistData,
+                      lastName: e.target.value,
+                    })
                   }
                 />
               </div>
@@ -721,7 +898,11 @@ const ChildLandingPage: React.FC = () => {
             </div>
             <button
               onClick={() => {
-                if (waitlistData.firstName && waitlistData.lastName && waitlistData.whatsappNumber) {
+                if (
+                  waitlistData.firstName &&
+                  waitlistData.lastName &&
+                  waitlistData.whatsappNumber
+                ) {
                   trackEvent("student_waitlist_joined", {
                     firstName: waitlistData.firstName,
                     lastName: waitlistData.lastName,
